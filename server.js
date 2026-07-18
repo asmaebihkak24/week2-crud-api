@@ -52,6 +52,31 @@ app.get("/tasks/:id", (req, res) => {
     res.json(task);
 
 });
+app.post("/tasks", (req, res) => {
+
+    const { title } = req.body;
+
+    // Validation
+    if (!title || title.trim() === "") {
+        return res.status(400).json({
+            error: "Title is required"
+        });
+    }
+
+    // Générer le prochain id
+    const newTask = {
+        id: tasks.length + 1,
+        title: title,
+        done: false
+    };
+
+    // Ajouter à la liste
+    tasks.push(newTask);
+
+    // Retourner la nouvelle tâche
+    res.status(201).json(newTask);
+
+});
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });
