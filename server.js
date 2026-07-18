@@ -1,15 +1,22 @@
 const express = require("express");
 
 const app = express();
+app.use(express.json());
 
 const PORT = 3000;
 
 app.get("/", (req, res) => {
     res.json({
-        message: "Welcome to my Backend AI Engineering server!"
+        name: "Task API",
+        version: "1.0",
+        endpoints: ["/tasks"]
     });
 });
-
+app.get("/health", (req, res) => {
+    res.json({
+        status: "ok"
+    });
+});
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });
