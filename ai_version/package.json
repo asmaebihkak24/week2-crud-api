@@ -1,0 +1,16 @@
+{
+  "name": "tasks-api",
+  "version": "1.0.0",
+  "description": "API CRUD pour la gestion de tâches (stockage en mémoire) avec documentation Swagger",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  }
+}
