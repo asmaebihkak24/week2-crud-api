@@ -3,6 +3,7 @@
 A simple CRUD API built with Node.js and Express.
 
 This project was developed as part of the Backend AI Engineering Week 2 assignment. It provides a REST API to create, read, update and delete tasks using an in-memory array.
+
 ## Installation
 
 Clone the repository:
@@ -22,7 +23,10 @@ Install dependencies:
 ```bash
 npm install
 ```
+
 ## Run the server
+
+Start the server:
 
 ```bash
 node server.js
@@ -38,18 +42,23 @@ Swagger UI:
 
 ```
 http://localhost:3000/docs
-```## API Endpoints
+```
+
+## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | / | API information |
-| GET | /health | Health check |
-| GET | /tasks | Get all tasks |
-| GET | /tasks/{id} | Get one task |
-| POST | /tasks | Create a new task |
-| PUT | /tasks/{id} | Update a task |
-| DELETE | /tasks/{id} | Delete a task |
-## Example
+| GET | `/` | API information |
+| GET | `/health` | Health check |
+| GET | `/tasks` | Get all tasks |
+| GET | `/tasks/{id}` | Get one task |
+| POST | `/tasks` | Create a new task |
+| PUT | `/tasks/{id}` | Update a task |
+| DELETE | `/tasks/{id}` | Delete a task |
+
+## Example curl
+
+Request:
 
 ```bash
 curl -i http://localhost:3000/tasks
@@ -68,5 +77,13 @@ Response:
 ```
 
 ## Swagger UI
+
+The API documentation is available through Swagger UI:
+
+```
+http://localhost:3000/docs
+```
+
+Screenshot:
 
 ![Swagger UI](swagger.png)
