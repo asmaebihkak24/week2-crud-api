@@ -1,8 +1,7 @@
 # Task API
+A simple CRUD API built with Node.js, Express and SQLite.
 
-A simple CRUD API built with Node.js and Express.
-
-This project was developed as part of the Backend AI Engineering Week 2 assignment. It provides a REST API to create, read, update and delete tasks using an in-memory array.
+This project was developed as part of the Backend AI Engineering Week 3 assignment. It provides a REST API to create, read, update and delete tasks stored in a SQLite database using the better-sqlite3 library.
 
 ## Installation
 
@@ -43,6 +42,37 @@ Swagger UI:
 ```
 http://localhost:3000/docs
 ```
+## Database
+
+### Why SQLite?
+
+SQLite was chosen because it is lightweight, serverless, and easy to integrate into small backend applications. It stores all data in a single file while providing persistent storage.
+
+### Database file
+
+The database is automatically created in the project directory as:
+
+```text
+tasks.db
+```
+
+The application automatically:
+
+- creates the database if it does not exist;
+- creates the `tasks` table if it is missing;
+- inserts three example tasks only on the first run.
+## Example SQL Query
+
+```sql
+SELECT * FROM tasks;
+```
+
+This query retrieves all tasks stored in the SQLite database.
+
+### Result in DB Browser for SQLite
+
+![Database Screenshot](database.png)
+This query returns all tasks stored in the SQLite database.
 
 ## API Endpoints
 
