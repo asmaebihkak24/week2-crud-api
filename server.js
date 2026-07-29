@@ -62,18 +62,20 @@ app.post("/tasks", (req, res) => {
         });
     }
 
-    // Générer le prochain id
+    
+   // Insérer la tâche dans la base de données
+    const result = db
+    .prepare("INSERT INTO tasks (title, done) VALUES (?, ?)")
+    .run(title, 0);
+
+// Créer l'objet à retourner
     const newTask = {
-        id: tasks.length + 1,
-        title: title,
-        done: false
-    };
+    id: result.lastInsertRowid,
+    title: title,
+    done: false
+};
 
-    // Ajouter à la liste
-    tasks.push(newTask);
-
-    // Retourner la nouvelle tâche
-    res.status(201).json(newTask);
+res.status(201).json(newTask);
 
 });
 app.put("/tasks/:id", (req, res) => {
