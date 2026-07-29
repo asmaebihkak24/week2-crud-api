@@ -81,16 +81,18 @@ res.status(201).json(newTask);
 app.put("/tasks/:id", (req, res) => {
 
     const id = parseInt(req.params.id);
+    const { title, done } = req.body;
 
-    const task = tasks.find(task => task.id === id);
+    // Vérifier que la tâche existe
+    const task = db.prepare(
+        "SELECT * FROM tasks WHERE id = ?"
+    ).get(id);
 
     if (!task) {
         return res.status(404).json({
-            error: `Task ${id} not found`
+            error: "Task not found"
         });
     }
-
-    const { title, done } = req.body;
 
     // Validation
     if (
@@ -102,30 +104,65 @@ app.put("/tasks/:id", (req, res) => {
         });
     }
 
-    if (title !== undefined) {
-        task.title = title;
-    }
+    // Garder les anciennes valeurs si elles ne sont pas modifiées
+    const newTitle = title !== undefined ? title : task.title;
+    const newDone = done !== undefined ? (done ? 1 : 0) : task.done;
 
-    if (done !== undefined) {
-        task.done = done;
-    }
+    db.prepare(
+        "UPDATE tasks SET title = ?, done = ? WHERE id = ?"
+    ).run(newTitle, newDone, id);
 
-    res.json(task);
+    const updatedTask = db.prepare(
+        "SELECT * FROM tasks WHERE id = ?"
+    ).get(id);
+
+    updatedTask.done = Boolean(updatedTask.done);
+
+    res.json(updatedTask);
 
 });
 app.delete("/tasks/:id", (req, res) => {
 
     const id = parseInt(req.params.id);
 
-    const index = tasks.findIndex(task => task.id === id);
+    // Vérifier que la tâche existe
+    const task = db.prepare(
+        "SELECT * FROM tasks WHERE id = ?"
+    ).get(id);
 
-    if (index === -1) {
+    if (!task) {
         return res.status(404).json({
-            error: `Task ${id} not found`
+            error: "Task not found"
         });
     }
 
-    tasks.splice(index, 1);
+    // Supprimer la tâche
+    db.prepare(
+        "DELETE FROM tasks WHERE id = ?"
+    ).run(id);
+
+    res.status(204).send();
+
+});
+app.delete("/tasks/:id", (req, res) => {
+
+    const id = parseInt(req.params.id);
+
+    // Vérifier que la tâche existe
+    const task = db.prepare(
+        "SELECT * FROM tasks WHERE id = ?"
+    ).get(id);
+
+    if (!task) {
+        return res.status(404).json({
+            error: "Task not found"
+        });
+    }
+
+    // Supprimer la tâche
+    db.prepare(
+        "DELETE FROM tasks WHERE id = ?"
+    ).run(id);
 
     res.status(204).send();
 
