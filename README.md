@@ -130,3 +130,16 @@ Screenshot:
 **3. What did I forget to specify in my prompt?**
 * **Error message format:** I did not specify the exact JSON structure to return in case of an error. The AI therefore chose to return a `{ message: "..." }` object, whereas I used `{ error: "..." }`.
 * **Strict key naming:** I didn't explicitly forbid the AI from translating the object's properties, which led to the `title`/`titre` inconsistency.
+## PostgreSQL with Docker
+
+Start PostgreSQL:
+
+docker run --name taskdb -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=tasks -p 5432:5432 -v taskdata:/var/lib/postgresql -d postgres
+
+Check the container:
+
+docker ps
+
+Open the PostgreSQL database:
+
+docker exec -it taskdb psql -U postgres -d tasks
