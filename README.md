@@ -143,3 +143,12 @@ docker ps
 Open the PostgreSQL database:
 
 docker exec -it taskdb psql -U postgres -d tasks
+## Stage 2 — Read from Postgres
+
+The read operations were implemented as part of the Stage 1 PostgreSQL migration.
+
+- `GET /tasks` reads all tasks from PostgreSQL.
+- `GET /tasks/:id` reads a task using a parameterized PostgreSQL query with `$1`.
+- Unknown task IDs return `404` with `{ "error": "Task not found" }`.
+
+The endpoints were tested successfully after the migration.
