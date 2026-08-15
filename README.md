@@ -152,3 +152,41 @@ The read operations were implemented as part of the Stage 1 PostgreSQL migration
 - Unknown task IDs return `404` with `{ "error": "Task not found" }`.
 
 The endpoints were tested successfully after the migration.
+## Stage 3 — Full CRUD on Postgres
+
+The CRUD API now supports the full cycle using PostgreSQL.
+
+### Endpoints
+
+- `POST /tasks` — Create a new task
+  - Inserts the task into PostgreSQL.
+  - Returns `201 Created`.
+  - Returns `400 Bad Request` if the title is missing or empty.
+
+- `GET /tasks` — Retrieve all tasks
+  - Reads tasks from PostgreSQL.
+  - Returns `200 OK`.
+
+- `PUT /tasks/:id` — Update an existing task
+  - Updates the title and done status.
+  - Returns `200 OK`.
+  - Returns `404 Not Found` if the task does not exist.
+
+- `DELETE /tasks/:id` — Delete a task
+  - Deletes the task from PostgreSQL.
+  - Returns `204 No Content` on success.
+  - Returns `404 Not Found` if the task does not exist.
+
+### PostgreSQL queries
+
+```sql
+INSERT INTO tasks (title, done)
+VALUES ($1, $2)
+RETURNING *;
+
+UPDATE tasks
+SET title = $1, done = $2
+WHERE id = $3;
+
+DELETE FROM tasks
+WHERE id = $1;
