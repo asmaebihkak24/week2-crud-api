@@ -1,100 +1,179 @@
 # Task API
-A simple CRUD API built with Node.js, Express and SQLite.
 
-This project was developed as part of the Backend AI Engineering Week 3 assignment. It provides a REST API to create, read, update and delete tasks stored in a SQLite database using the better-sqlite3 library.
+A RESTful CRUD API built with **Node.js, Express and PostgreSQL**, containerized with **Docker Compose**.
 
-## Installation
+This project was developed as part of the Backend AI Engineering Week 3 assignment. It provides endpoints to create, read, update and delete tasks stored in a PostgreSQL database.
+
+## Technologies
+
+* Node.js
+* Express
+* PostgreSQL
+* Docker
+* Docker Compose
+* Swagger / OpenAPI
+
+## Prerequisites
+
+Before running the project, make sure you have:
+
+* Docker Desktop installed
+* Git installed
+
+No local PostgreSQL installation or manual database setup is required.
+
+## One-Command Setup
 
 Clone the repository:
 
 ```bash
 git clone https://github.com/asmaebihkak24/week2-crud-api.git
-```
-
-Go to the project folder:
-
-```bash
 cd week2-crud-api
 ```
 
-Install dependencies:
+Create the environment file from the example:
+
+### PowerShell
+
+```powershell
+Copy-Item .env.example .env
+```
+
+### Linux / macOS
 
 ```bash
-npm install
+cp .env.example .env
 ```
 
-## Run the server
-
-Start the server:
+Then start the complete stack:
 
 ```bash
-node server.js
+docker compose up
 ```
 
-The server runs on:
+Docker Compose automatically starts:
 
-```
+* the PostgreSQL database;
+* the Node.js API;
+* the required network;
+* the database initialization.
+
+No manual database creation or SQL setup is required.
+
+The API will be available at:
+
+```text
 http://localhost:3000
 ```
 
 Swagger UI:
 
-```
+```text
 http://localhost:3000/docs
 ```
-## Database
 
-### Why SQLite?
+## Environment Variables
 
-SQLite was chosen because it is lightweight, serverless, and easy to integrate into small backend applications. It stores all data in a single file while providing persistent storage.
+The project uses a `.env` file for configuration.
 
-### Database file
+The `.env.example` file contains the required variable:
 
-The database is automatically created in the project directory as:
-
-```text
-tasks.db
+```env
+DATABASE_URL=postgres://postgres:dev@localhost:5432/tasks
 ```
 
-The application automatically:
+Copy `.env.example` to `.env` before starting the application.
 
-- creates the database if it does not exist;
-- creates the `tasks` table if it is missing;
-- inserts three example tasks only on the first run.
-## Example SQL Query
+The `.env` file is intentionally excluded from Git through `.gitignore`.
+
+## Database
+
+The application uses **PostgreSQL** running inside Docker.
+
+The database is configured by Docker Compose with:
+
+* Database: `tasks`
+* User: `postgres`
+* Password: `dev`
+* Port: `5432`
+
+The database data is persisted through a Docker volume.
+
+### Check the database
+
+After starting the stack, open a PostgreSQL shell inside the database container:
+
+```bash
+docker compose exec db psql -U postgres -d tasks
+```
+
+List the tables:
+
+```sql
+\dt
+```
+
+Expected result includes:
+
+```text
+tasks
+```
+
+Display the stored tasks:
 
 ```sql
 SELECT * FROM tasks;
 ```
 
-This query retrieves all tasks stored in the SQLite database.
+Example result:
 
-### Result in DB Browser for SQLite
+```text
+ id |              title              | done
+----+---------------------------------+------
+  1 | Learn Express                   | f
+  2 | Study SQLite                    | f
+  3 | Build CRUD API                  | f
+  4 | Docker Compose Persistence Test | f
+```
 
-![Database Screenshot](database.png)
-This query returns all tasks stored in the SQLite database.
+The database contains the seeded tasks and the API reads them directly from PostgreSQL.
+
+Exit PostgreSQL with:
+
+```sql
+\q
+```
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | API information |
-| GET | `/health` | Health check |
-| GET | `/tasks` | Get all tasks |
-| GET | `/tasks/{id}` | Get one task |
-| POST | `/tasks` | Create a new task |
-| PUT | `/tasks/{id}` | Update a task |
-| DELETE | `/tasks/{id}` | Delete a task |
+| Method | Endpoint     | Description             | Success          |
+| ------ | ------------ | ----------------------- | ---------------- |
+| GET    | `/`          | API information         | `200 OK`         |
+| GET    | `/health`    | Health check            | `200 OK`         |
+| GET    | `/tasks`     | Get all tasks           | `200 OK`         |
+| GET    | `/tasks/:id` | Get one task            | `200 OK`         |
+| POST   | `/tasks`     | Create a new task       | `201 Created`    |
+| PUT    | `/tasks/:id` | Update an existing task | `200 OK`         |
+| DELETE | `/tasks/:id` | Delete a task           | `204 No Content` |
 
-## Example curl
+### Error responses
 
-Request:
+* `400 Bad Request` — invalid or missing task data
+* `404 Not Found` — task does not exist
+
+## Example Requests
+
+### Get all tasks
 
 ```bash
 curl -i http://localhost:3000/tasks
 ```
 
-Response:
+Example response:
+
+```text
+HTTP/1.1 200 OK
+```
 
 ```json
 [
@@ -102,91 +181,161 @@ Response:
     "id": 1,
     "title": "Learn Express",
     "done": false
+  },
+  {
+    "id": 2,
+    "title": "Study SQLite",
+    "done": false
+  },
+  {
+    "id": 3,
+    "title": "Build CRUD API",
+    "done": false
+  },
+  {
+    "id": 4,
+    "title": "Docker Compose Persistence Test",
+    "done": false
   }
 ]
 ```
 
+### Create a task
+
+```bash
+curl -i -X POST http://localhost:3000/tasks \
+  -H "Content-Type: application/json" \
+  -d "{\"title\":\"New Task\"}"
+```
+
+### Get one task
+
+```bash
+curl -i http://localhost:3000/tasks/1
+```
+
+### Update a task
+
+```bash
+curl -i -X PUT http://localhost:3000/tasks/1 \
+  -H "Content-Type: application/json" \
+  -d "{\"title\":\"Updated Task\",\"done\":true}"
+```
+
+### Delete a task
+
+```bash
+curl -i -X DELETE http://localhost:3000/tasks/1
+```
+
 ## Swagger UI
 
-The API documentation is available through Swagger UI:
+Interactive API documentation is available at:
 
-```
+```text
 http://localhost:3000/docs
 ```
 
-Screenshot:
+The OpenAPI specification is stored in `openapi.json`.
 
-![Swagger UI](swagger.png)
-## Stage 7: AI vs me
+## Round-Trip Verification
 
-**1. What did the AI do better ?**
-* **Deployment anticipation:** The AI used `const PORT = process.env.PORT || 3000;` to configure the port. This is an excellent practice that prepares the API to be hosted on a cloud server.
-* **DRY (Don't Repeat Yourself) principle:** It created a utility function `findTaskIndex(id)` to avoid repeating the search logic in the GET, PUT, and DELETE routes.
-* **Strict type validation:** The AI added type checks (e.g., `typeof done === 'boolean'`) to ensure that the received data matches what is expected.
+The complete application can be tested from a clean clone without manually creating the database.
 
-**2. What did the AI miss or ignore from my prompt?**
-* **Swagger implementation:** Instead of using a clean external file (`openapi.json`), the AI overloaded the `server.js` file with long blocks of comments, making the code less readable.
+### Step 1 — Clone
 
-**3. What did I forget to specify in my prompt?**
-* **Error message format:** I did not specify the exact JSON structure to return in case of an error. The AI therefore chose to return a `{ message: "..." }` object, whereas I used `{ error: "..." }`.
-* **Strict key naming:** I didn't explicitly forbid the AI from translating the object's properties, which led to the `title`/`titre` inconsistency.
-## PostgreSQL with Docker
+```bash
+git clone https://github.com/asmaebihkak24/week2-crud-api.git
+cd week2-crud-api
+```
 
-Start PostgreSQL:
+### Step 2 — Create `.env`
 
-docker run --name taskdb -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=tasks -p 5432:5432 -v taskdata:/var/lib/postgresql -d postgres
+PowerShell:
 
-Check the container:
+```powershell
+Copy-Item .env.example .env
+```
 
-docker ps
+Linux / macOS:
 
-Open the PostgreSQL database:
+```bash
+cp .env.example .env
+```
 
-docker exec -it taskdb psql -U postgres -d tasks
-## Stage 2 — Read from Postgres
+### Step 3 — Start everything
 
-The read operations were implemented as part of the Stage 1 PostgreSQL migration.
+```bash
+docker compose up
+```
 
-- `GET /tasks` reads all tasks from PostgreSQL.
-- `GET /tasks/:id` reads a task using a parameterized PostgreSQL query with `$1`.
-- Unknown task IDs return `404` with `{ "error": "Task not found" }`.
+### Step 4 — Verify the API
 
-The endpoints were tested successfully after the migration.
-## Stage 3 — Full CRUD on Postgres
+In another terminal:
 
-The CRUD API now supports the full cycle using PostgreSQL.
+```bash
+curl -i http://localhost:3000/tasks
+```
 
-### Endpoints
+Expected:
 
-- `POST /tasks` — Create a new task
-  - Inserts the task into PostgreSQL.
-  - Returns `201 Created`.
-  - Returns `400 Bad Request` if the title is missing or empty.
+```text
+HTTP/1.1 200 OK
+```
 
-- `GET /tasks` — Retrieve all tasks
-  - Reads tasks from PostgreSQL.
-  - Returns `200 OK`.
+followed by the seeded tasks.
 
-- `PUT /tasks/:id` — Update an existing task
-  - Updates the title and done status.
-  - Returns `200 OK`.
-  - Returns `404 Not Found` if the task does not exist.
+### Step 5 — Verify PostgreSQL
 
-- `DELETE /tasks/:id` — Delete a task
-  - Deletes the task from PostgreSQL.
-  - Returns `204 No Content` on success.
-  - Returns `404 Not Found` if the task does not exist.
+```bash
+docker compose exec db psql -U postgres -d tasks
+```
 
-### PostgreSQL queries
+Then:
 
 ```sql
-INSERT INTO tasks (title, done)
-VALUES ($1, $2)
-RETURNING *;
+\dt
+```
 
-UPDATE tasks
-SET title = $1, done = $2
-WHERE id = $3;
+and:
 
-DELETE FROM tasks
-WHERE id = $1;
+```sql
+SELECT * FROM tasks;
+```
+
+This confirms the complete round-trip:
+
+```text
+GitHub repository
+       ↓
+.env.example
+       ↓
+.env
+       ↓
+docker compose up
+       ↓
+PostgreSQL + API
+       ↓
+GET /tasks
+       ↓
+Seeded tasks returned
+```
+
+No manual database setup is required.
+
+## Stage 7: AI vs Me
+
+### 1. What did the AI do better?
+
+* **Deployment anticipation:** The AI used `const PORT = process.env.PORT || 3000;` to configure the port. This prepares the API to be hosted on a cloud server.
+* **DRY (Don't Repeat Yourself) principle:** It created a utility function `findTaskIndex(id)` to avoid repeating the search logic in the GET, PUT, and DELETE routes.
+* **Strict type validation:** The AI added type checks such as `typeof done === 'boolean'` to ensure that received data matches the expected format.
+
+### 2. What did the AI miss or ignore from my prompt?
+
+* **Swagger implementation:** Instead of using a clean external file (`openapi.json`), the AI initially overloaded `server.js` with long blocks of comments, making the code less readable.
+
+### 3. What did I forget to specify in my prompt?
+
+* **Error message format:** I did not specify the exact JSON structure to return in case of an error. The AI therefore chose to return a `{ message: "..." }` object, whereas I used `{ error: "..." }`.
+* **Strict key naming:** I did not explicitly forbid the AI from translating the object's properties, which led to the `title`/`titre` inconsistency.
