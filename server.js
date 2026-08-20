@@ -44,8 +44,7 @@ app.get("/public/info", (req, res) => {
     message: "Welcome stranger! This info is public.",
   });
 });
-// Protected profile - Stage 3
-app.get("/protected/profile", async (req, res) => {
+async function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
 
   // Vérifier la présence du header
@@ -71,7 +70,7 @@ app.get("/protected/profile", async (req, res) => {
   const token = parts[1];
 
   try {
-    // Vérifier réellement le token auprès de Supabase
+    // Vérifier le token avec Supabase
     const { data, error } = await supabase.auth.getUser(token);
 
     if (error || !data.user) {
@@ -80,19 +79,30 @@ app.get("/protected/profile", async (req, res) => {
       });
     }
 
-    // Token valide : retourner uniquement les informations sûres
-    return res.status(200).json({
-      id: data.user.id,
-      email: data.user.email,
-      created_at: data.user.created_at,
-    });
+    // Stocker l'utilisateur pour la route suivante
+    req.user = data.user;
+
+    next();
   } catch (error) {
-    console.error("Token verification error:", error);
+    console.error("Authentication error:", error);
 
     return res.status(401).json({
       error: "Invalid or expired token",
     });
   }
+}
+app.get("/protected/profile", authMiddleware, (req, res) => {
+  res.status(200).json({
+    id: req.user.id,
+    email: req.user.email,
+    created_at: req.user.created_at,
+  });
+});
+app.get("/protected/dashboard", authMiddleware, (req, res) => {
+  res.status(200).json({
+    message: "Welcome to your dashboard",
+    user_id: req.user.id,
+  });
 });
 
 // GET /tasks
@@ -292,7 +302,26 @@ app.post("/auth/login", async (req, res) => {
     });
   }
 });
+app.post("/auth/logout", authMiddleware, async (req, res) => {
+  try {
+    const { error } = await supabase.auth.signOut();
 
+    if (error) {
+      console.error("Logout error:", error);
+      return res.status(500).json({
+        error: "Logout failed",
+      });
+    }
+
+    return res.status(204).send();
+  } catch (error) {
+    console.error("Logout error:", error);
+
+    return res.status(500).json({
+      error: "Logout failed",
+    });
+  }
+});
 
 // Swagger
 app.use(
