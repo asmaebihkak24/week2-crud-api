@@ -167,6 +167,75 @@ app.delete("/tasks/:id", async (req, res) => {
     });
   }
 });
+// POST /auth/signup
+app.post("/auth/signup", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validation
+    if (!email || !password) {
+      return res.status(400).json({
+        error: "Email and password are required",
+      });
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) {
+      console.error("Signup error:", error);
+      return res.status(400).json({
+        error: error.message,
+      });
+    }
+
+    res.status(201).json({
+      user: data.user,
+    });
+  } catch (error) {
+    console.error("Signup error:", error);
+    res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+});
+// POST /auth/login
+app.post("/auth/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validation
+    if (!email || !password) {
+      return res.status(400).json({
+        error: "Email and password are required",
+      });
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      console.error("Login error:", error);
+      return res.status(401).json({
+        error: "Invalid login credentials",
+      });
+    }
+
+    res.status(200).json({
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token,
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+});
 
 // Swagger
 app.use(
