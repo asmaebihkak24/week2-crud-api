@@ -38,6 +38,42 @@ app.get("/health", (req, res) => {
     status: "ok",
   });
 });
+// Public info
+app.get("/public/info", (req, res) => {
+  res.status(200).json({
+    message: "Welcome stranger! This info is public.",
+  });
+});
+// Protected profile
+app.get("/protected/profile", (req, res) => {
+  const authHeader = req.headers.authorization;
+
+  // Aucun Authorization header
+  if (!authHeader) {
+    return res.status(401).json({
+      error: "Access token required",
+    });
+  }
+
+  // Vérifier le format Bearer <token>
+  const parts = authHeader.split(" ");
+
+  if (
+    parts.length !== 2 ||
+    parts[0] !== "Bearer" ||
+    !parts[1]
+  ) {
+    return res.status(401).json({
+      error: "Access token required",
+    });
+  }
+
+  // Stage 2 : on vérifie seulement que le token existe.
+  // La vérification réelle avec Supabase sera faite au Stage 3.
+  res.status(200).json({
+    message: "Token received",
+  });
+});
 
 // GET /tasks
 app.get("/tasks", async (req, res) => {
@@ -236,6 +272,7 @@ app.post("/auth/login", async (req, res) => {
     });
   }
 });
+
 
 // Swagger
 app.use(
