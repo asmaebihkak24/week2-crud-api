@@ -44,11 +44,11 @@ app.get("/public/info", (req, res) => {
     message: "Welcome stranger! This info is public.",
   });
 });
-// Protected profile
-app.get("/protected/profile", (req, res) => {
+// Protected profile - Stage 3
+app.get("/protected/profile", async (req, res) => {
   const authHeader = req.headers.authorization;
 
-  // Aucun Authorization header
+  // Vérifier la présence du header
   if (!authHeader) {
     return res.status(401).json({
       error: "Access token required",
@@ -68,11 +68,31 @@ app.get("/protected/profile", (req, res) => {
     });
   }
 
-  // Stage 2 : on vérifie seulement que le token existe.
-  // La vérification réelle avec Supabase sera faite au Stage 3.
-  res.status(200).json({
-    message: "Token received",
-  });
+  const token = parts[1];
+
+  try {
+    // Vérifier réellement le token auprès de Supabase
+    const { data, error } = await supabase.auth.getUser(token);
+
+    if (error || !data.user) {
+      return res.status(401).json({
+        error: "Invalid or expired token",
+      });
+    }
+
+    // Token valide : retourner uniquement les informations sûres
+    return res.status(200).json({
+      id: data.user.id,
+      email: data.user.email,
+      created_at: data.user.created_at,
+    });
+  } catch (error) {
+    console.error("Token verification error:", error);
+
+    return res.status(401).json({
+      error: "Invalid or expired token",
+    });
+  }
 });
 
 // GET /tasks
